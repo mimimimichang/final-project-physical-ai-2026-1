@@ -1,0 +1,4 @@
+__pycache__/
+/notes/
+/results/*_[0-9]*.*
+/plans/*_[0-9]*.json

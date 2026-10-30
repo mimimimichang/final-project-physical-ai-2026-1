@@ -1,0 +1,496 @@
+<?xml version="1.0" ?>
+<sdf version="1.8"> <!-- Modified for Gazebo Harmonic; added two static cones and a front GPU LiDAR. -->
+    <world name="WorldDemo"> <!--ワールドの内容は全てこのタグの中に-->
+        <physics name="1ms" type="ignored">
+            <max_step_size>0.001</max_step_size> <!--最大何秒ごとにシミュレートするか（小さいほど正確なシミュレーションになる）-->
+            <real_time_factor>1.0</real_time_factor> <!--現実時間との比率-->
+        </physics>
+        <plugin
+            filename="gz-sim-physics-system"
+            name="gz::sim::systems::Physics">
+        </plugin> <!--動力学のシミュレーションに必要-->
+        <plugin
+            filename="gz-sim-user-commands-system"
+            name="gz::sim::systems::UserCommands">
+        </plugin> <!--ユーザーコマンドを利用可能に-->
+        <plugin
+            filename="gz-sim-scene-broadcaster-system"
+            name="gz::sim::systems::SceneBroadcaster">
+        </plugin> <!--ワールドシーンの描画-->
+        <plugin filename="gz-sim-sensors-system"
+                name="gz::sim::systems::Sensors">
+          <render_engine>ogre2</render_engine>
+        </plugin>
+
+        <plugin filename="gz-sim-triggered-publisher-system"
+            name="gz::sim::systems::TriggeredPublisher">
+          <input type="gz.msgs.Int32" topic="/keyboard/keypress"> <!--受信するトピックを指定-->
+                <match field="data">16777235</match> <!--↑キーに一致するという条件を指定-->
+            </input>
+            <output type="gz.msgs.Twist" topic="/cmd_vel"> <!--送信するトピックを指定-->
+                linear: {x: 0.5}, angular: {z: 0.0} <!--トピックの内容を指定-->
+            </output>
+        </plugin>
+        <!-- Moving Backward-->
+        <plugin filename="gz-sim-triggered-publisher-system"
+            name="gz::sim::systems::TriggeredPublisher">
+          <input type="gz.msgs.Int32" topic="/keyboard/keypress">
+                <match field="data">16777237</match>
+            </input>
+            <output type="gz.msgs.Twist" topic="/cmd_vel">
+                linear: {x: -0.5}, angular: {z: 0.0}
+            </output>
+        </plugin>
+        <!--右-->
+        <plugin filename="gz-sim-triggered-publisher-system"
+            name="gz::sim::systems::TriggeredPublisher">
+          <input type="gz.msgs.Int32" topic="/keyboard/keypress">
+                <match field="data">16777236</match>
+            </input>
+            <output type="gz.msgs.Twist" topic="/cmd_vel">
+                linear: {x: 0.0}, angular: {z: -0.5}
+            </output>
+        </plugin>
+        <!--左-->
+        <plugin filename="gz-sim-triggered-publisher-system"
+            name="gz::sim::systems::TriggeredPublisher">
+          <input type="gz.msgs.Int32" topic="/keyboard/keypress">
+                <match field="data">16777234 </match>
+            </input>
+            <output type="gz.msgs.Twist" topic="/cmd_vel">
+                linear: {x: 0.0}, angular: {z: 0.5}
+            </output>
+        </plugin>
+
+        <!--光に関する設定-->
+        <light type="directional" name="sun"> <!--pointかdirectional、spot.-->
+            <cast_shadows>true</cast_shadows> <!--trueなら影ができる-->
+            <pose>0 0 10 0 0 0</pose> <!--位置 relative_to attributeを追加できる、しなければworldに関連付けられる-->
+            <diffuse>0.8 0.8 0.8 1</diffuse>
+            <specular>0.2 0.2 0.2 1</specular>
+            <attenuation>
+                <range>1000</range><!--光の範囲-->
+                <constant>0.9</constant><!--減衰係数0-1、1は減衰しない-->
+                <linear>0.01</linear><!--線形減衰係数0-1、1は距離について均等に減衰-->
+                <quadratic>0.001</quadratic><!--光の方向性、pointには適用されない-->
+            </attenuation>
+            <direction>-0.5 0.1 -0.9</direction>
+        </light>
+
+        <model name="ground_plane">
+          <static>true</static>
+          <link name="link">
+              <collision name="collision">
+              <geometry>
+                  <plane>
+                  <normal>0 0 1</normal>
+                  </plane>
+              </geometry>
+              </collision>
+              <visual name="visual">
+              <geometry>
+                  <plane>
+                  <normal>0 0 1</normal>
+                  <size>100 100</size>
+                  </plane>
+              </geometry>
+              <material>
+                  <ambient>0.8 0.8 0.8 1</ambient>
+                  <diffuse>0.8 0.8 0.8 1</diffuse>
+                  <specular>0.8 0.8 0.8 1</specular>
+              </material>
+              </visual>
+          </link>
+      </model>
+        
+      <model name="demoRobot">
+        <!--モデルが地面にめり込まないように少し浮かせています-->
+        <pose>0 0 0.2 0 0 0</pose>
+          <link name="base_link">
+            <inertial>
+              <pose>0.1 0 0 0 0 0</pose>
+              <inertia>
+                <ixx>4.2111447e-02</ixx>
+                <ixy>0</ixy>
+                <ixz>0</ixz>
+                <iyy>4.2111447e-02</iyy>
+                <iyz>0</iyz>
+                <izz>7.5254874e-02</izz>
+              </inertia>
+              <mass>1.3729096e+00</mass>
+            </inertial>
+            <collision name="base_collision">
+              <!--重心の位置を調整しています-->
+              <pose>-0.064 0.08 0.06 0 0 -1.57</pose>
+              <geometry>
+                <mesh>
+                  <uri>model://meshes/2DRoboPrac.stl</uri>
+                </mesh>
+              </geometry>
+            </collision>
+            <visual name="base_visual">
+              <!--重心の位置を調整しています-->
+              <pose>-0.064 0.08 0.06 0 0 -1.57</pose>
+              <geometry>
+                <mesh>
+                  <uri>model://meshes/2DRoboPrac.dae</uri>
+                </mesh>
+              </geometry>
+              <material>
+                <diffuse>0.32 0.62 0.9 1</diffuse>
+                <ambient>0.32 0.62 0.9 1</ambient>
+                <specular>0.65 0.82 1 1</specular>
+              </material>
+            </visual>
+            <sensor name="front_lidar" type="gpu_lidar">
+              <pose>0.12 0 0.05 0 0 0</pose>
+              <topic>/scan</topic>
+              <update_rate>10</update_rate>
+              <ray>
+                <scan>
+                  <horizontal>
+                    <samples>181</samples>
+                    <resolution>1</resolution>
+                    <min_angle>-1.5708</min_angle>
+                    <max_angle>1.5708</max_angle>
+                  </horizontal>
+                  <vertical>
+                    <samples>1</samples>
+                    <resolution>1</resolution>
+                    <min_angle>0</min_angle>
+                    <max_angle>0</max_angle>
+                  </vertical>
+                </scan>
+                <range>
+                  <min>0.08</min>
+                  <max>5.0</max>
+                  <resolution>0.01</resolution>
+                </range>
+              </ray>
+              <always_on>true</always_on>
+              <visualize>true</visualize>
+            </sensor>
+          </link>
+
+          <!-- Wheel left -->
+          <link name="wheel_left_link">
+            <pose>0.0 0.095 0.023 -1.57 0 0</pose>
+            <inertial>
+              <inertia>
+                <ixx>1.1175580e-05</ixx>
+                <ixy>-4.2369783e-11</ixy>
+                <ixz>-5.9381719e-09</ixz>
+                <iyy>1.1192413e-05</iyy>
+                <iyz>-1.4400107e-11</iyz>
+                <izz>2.0712558e-05</izz>
+              </inertia>
+              <mass>0.1</mass>
+            </inertial>
+            <collision name="wheel_left_collision">
+              <geometry>
+                <cylinder>
+                  <radius>0.033</radius>
+                  <length>0.018</length>
+                </cylinder>
+              </geometry>
+            </collision>
+            <visual name="wheel_left_visual">
+              <geometry>
+                <cylinder>
+                  <radius>0.033</radius>
+                  <length>0.018</length>
+                </cylinder>
+                </geometry>
+                <material>
+                  <ambient>0.96 0.62 0.7 1</ambient>
+                  <diffuse>0.96 0.62 0.7 1</diffuse>
+                  <specular>1 0.82 0.85 1</specular>
+                </material>
+            </visual>
+          </link>
+          <joint name="wheel_left_joint" type="revolute">
+            <parent>base_link</parent>
+            <child>wheel_left_link</child>
+            <axis>
+              <xyz>0 0 1</xyz>
+            </axis>
+          </joint>
+
+          <!-- Wheel right -->
+          <link name="wheel_right_link">
+            <pose>0.0 -0.095 0.023 -1.57 0 0</pose>
+            <inertial>
+              <inertia>
+                <ixx>1.1175580e-05</ixx>
+                <ixy>-4.2369783e-11</ixy>
+                <ixz>-5.9381719e-09</ixz>
+                <iyy>1.1192413e-05</iyy>
+                <iyz>-1.4400107e-11</iyz>
+                <izz>2.0712558e-05</izz>
+              </inertia>
+              <mass>0.1</mass>
+            </inertial>
+            <collision name="wheel_right_collision">
+              <geometry>
+                <cylinder>
+                  <radius>0.033</radius>
+                  <length>0.018</length>
+                </cylinder>
+              </geometry>
+            </collision>
+            <visual name="wheel_right_visual">
+              <geometry>
+                <cylinder>
+                  <radius>0.033</radius>
+                  <length>0.018</length>
+                </cylinder>
+                </geometry>
+                <material>
+                  <ambient>0.96 0.62 0.7 1</ambient>
+                  <diffuse>0.96 0.62 0.7 1</diffuse>
+                  <specular>1 0.82 0.85 1</specular>
+              </material>
+            </visual>
+          </link>
+          <joint name="wheel_right_joint" type="revolute">
+            <parent>base_link</parent>
+            <child>wheel_right_link</child>
+            <axis>
+              <xyz>0 0 1</xyz>
+            </axis>
+          </joint>
+
+          <link name='caster_back_right_link'>
+            <pose>0.15 -0.05 -0.004 -1.57 0 0</pose>
+            <inertial>
+              <mass>0.001</mass>
+              <inertia>
+                <ixx>0.00001</ixx>
+                <ixy>0.000</ixy>
+                <ixz>0.000</ixz>
+                <iyy>0.00001</iyy>
+                <iyz>0.000</iyz>
+                <izz>0.00001</izz>
+              </inertia>
+            </inertial>
+            <visual name='caster_back_right_visual'>
+                <geometry>
+                    <sphere>
+                        <radius>0.005</radius>
+                    </sphere>
+                </geometry>
+                <material>
+                    <ambient>0.98 0.83 0.56 1</ambient>
+                    <diffuse>0.98 0.83 0.56 1</diffuse>
+                    <specular>1 0.93 0.75 1</specular>
+                </material>
+              </visual>
+            <collision name='collision'>
+              <geometry>
+                <sphere>
+                  <radius>0.005</radius>
+                </sphere>
+              </geometry>
+            </collision>
+          </link>
+          <joint name='caster_back_right_joint' type='ball'>
+            <parent>base_link</parent>
+            <child>caster_back_right_link</child>
+          </joint>
+
+          <link name='caster_back_left_link'>
+            <pose>0.15 0.05 -0.004 -1.57 0 0</pose>
+            <inertial>
+              <mass>0.001</mass>
+              <inertia>
+                <ixx>0.00001</ixx>
+                <ixy>0.000</ixy>
+                <ixz>0.000</ixz>
+                <iyy>0.00001</iyy>
+                <iyz>0.000</iyz>
+                <izz>0.00001</izz>
+              </inertia>
+            </inertial>
+            <visual name='caster_back_left_visual'>
+                <geometry>
+                    <sphere>
+                        <radius>0.005</radius>
+                    </sphere>
+                </geometry>
+                <material>
+                    <ambient>0.98 0.83 0.56 1</ambient>
+                    <diffuse>0.98 0.83 0.56 1</diffuse>
+                    <specular>1 0.93 0.75 1</specular>
+                </material>
+              </visual>
+            <collision name='collision'>
+              <geometry>
+                <sphere>
+                  <radius>0.005</radius>
+                </sphere>
+              </geometry>
+            </collision>
+          </link>
+          <joint name='caster_back_left_joint' type='ball'>
+            <parent>base_link</parent>
+            <child>caster_back_left_link</child>
+          </joint>
+
+          <!-- Differential drive -->
+          <plugin filename="gz-sim-diff-drive-system"
+            name="gz::sim::systems::DiffDrive">
+            <left_joint>wheel_left_joint</left_joint>
+            <right_joint>wheel_right_joint</right_joint>
+            <wheel_separation>0.19</wheel_separation>
+            <wheel_radius>0.033</wheel_radius>
+            <topic>cmd_vel</topic>
+          </plugin>
+        </model>
+
+        <model name="obstacle_cone">
+          <static>true</static>
+          <pose>1.4 0 0 0 0 0</pose>
+          <link name="cone_link">
+            <collision name="base_collision">
+              <pose>0 0 0.0125 0 0 0</pose>
+              <geometry>
+                <box>
+                  <size>0.18 0.18 0.025</size>
+                </box>
+              </geometry>
+            </collision>
+            <visual name="base_visual">
+              <pose>0 0 0.0125 0 0 0</pose>
+              <geometry>
+                <box>
+                  <size>0.18 0.18 0.025</size>
+                </box>
+              </geometry>
+              <material>
+                <ambient>0.08 0.08 0.08 1</ambient>
+                <diffuse>0.08 0.08 0.08 1</diffuse>
+              </material>
+            </visual>
+            <collision name="body_collision">
+              <pose>0 0 0.155 0 0 0</pose>
+              <geometry>
+                <cylinder>
+                  <radius>0.075</radius>
+                  <length>0.26</length>
+                </cylinder>
+              </geometry>
+            </collision>
+            <visual name="lower_red_section">
+              <pose>0 0 0.06 0 0 0</pose>
+              <geometry>
+                <cylinder>
+                  <radius>0.075</radius>
+                  <length>0.07</length>
+                </cylinder>
+              </geometry>
+              <material>
+                <ambient>0.9 0.19 0.27 1</ambient>
+                <diffuse>0.9 0.19 0.27 1</diffuse>
+              </material>
+            </visual>
+            <visual name="lower_white_band">
+              <pose>0 0 0.115 0 0 0</pose>
+              <geometry>
+                <cylinder>
+                  <radius>0.061</radius>
+                  <length>0.04</length>
+                </cylinder>
+              </geometry>
+              <material>
+                <ambient>1 0.97 0.9 1</ambient>
+                <diffuse>1 0.97 0.9 1</diffuse>
+              </material>
+            </visual>
+            <visual name="middle_red_section">
+              <pose>0 0 0.1625 0 0 0</pose>
+              <geometry>
+                <cylinder>
+                  <radius>0.049</radius>
+                  <length>0.055</length>
+                </cylinder>
+              </geometry>
+              <material>
+                <ambient>0.9 0.19 0.27 1</ambient>
+                <diffuse>0.9 0.19 0.27 1</diffuse>
+              </material>
+            </visual>
+            <visual name="upper_white_band">
+              <pose>0 0 0.2075 0 0 0</pose>
+              <geometry>
+                <cylinder>
+                  <radius>0.036</radius>
+                  <length>0.035</length>
+                </cylinder>
+              </geometry>
+              <material>
+                <ambient>1 0.97 0.9 1</ambient>
+                <diffuse>1 0.97 0.9 1</diffuse>
+              </material>
+            </visual>
+            <visual name="tip_red_section">
+              <pose>0 0 0.255 0 0 0</pose>
+              <geometry>
+                <cylinder>
+                  <radius>0.022</radius>
+                  <length>0.06</length>
+                </cylinder>
+              </geometry>
+              <material>
+                <ambient>0.9 0.19 0.27 1</ambient>
+                <diffuse>0.9 0.19 0.27 1</diffuse>
+              </material>
+            </visual>
+          </link>
+        </model>
+
+        <model name="obstacle_cone_2">
+          <static>true</static>
+          <pose>2.2 0.9 0 0 0 0</pose>
+          <link name="cone_link">
+            <collision name="base_collision">
+              <pose>0 0 0.0125 0 0 0</pose>
+              <geometry><box><size>0.18 0.18 0.025</size></box></geometry>
+            </collision>
+            <visual name="base_visual">
+              <pose>0 0 0.0125 0 0 0</pose>
+              <geometry><box><size>0.18 0.18 0.025</size></box></geometry>
+              <material><ambient>0.08 0.08 0.08 1</ambient><diffuse>0.08 0.08 0.08 1</diffuse></material>
+            </visual>
+            <collision name="body_collision">
+              <pose>0 0 0.155 0 0 0</pose>
+              <geometry><cylinder><radius>0.075</radius><length>0.26</length></cylinder></geometry>
+            </collision>
+            <visual name="lower_red_section">
+              <pose>0 0 0.06 0 0 0</pose>
+              <geometry><cylinder><radius>0.075</radius><length>0.07</length></cylinder></geometry>
+              <material><ambient>0.9 0.19 0.27 1</ambient><diffuse>0.9 0.19 0.27 1</diffuse></material>
+            </visual>
+            <visual name="lower_white_band">
+              <pose>0 0 0.115 0 0 0</pose>
+              <geometry><cylinder><radius>0.061</radius><length>0.04</length></cylinder></geometry>
+              <material><ambient>1 0.97 0.9 1</ambient><diffuse>1 0.97 0.9 1</diffuse></material>
+            </visual>
+            <visual name="middle_red_section">
+              <pose>0 0 0.1625 0 0 0</pose>
+              <geometry><cylinder><radius>0.049</radius><length>0.055</length></cylinder></geometry>
+              <material><ambient>0.9 0.19 0.27 1</ambient><diffuse>0.9 0.19 0.27 1</diffuse></material>
+            </visual>
+            <visual name="upper_white_band">
+              <pose>0 0 0.2075 0 0 0</pose>
+              <geometry><cylinder><radius>0.036</radius><length>0.035</length></cylinder></geometry>
+              <material><ambient>1 0.97 0.9 1</ambient><diffuse>1 0.97 0.9 1</diffuse></material>
+            </visual>
+            <visual name="tip_red_section">
+              <pose>0 0 0.255 0 0 0</pose>
+              <geometry><cylinder><radius>0.022</radius><length>0.06</length></cylinder></geometry>
+              <material><ambient>0.9 0.19 0.27 1</ambient><diffuse>0.9 0.19 0.27 1</diffuse></material>
+            </visual>
+          </link>
+        </model>
+    </world>
+</sdf>

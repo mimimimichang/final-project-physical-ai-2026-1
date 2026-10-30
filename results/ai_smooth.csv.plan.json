@@ -1,0 +1,24 @@
+{
+  "plan_file": "plans/command.json",
+  "plan_sha256": "1c4cd3b6aabfad5e3556bf7690f6b6e14d55c7131adf8c61ee85faf9052ce0af",
+  "plan": {
+    "action": "forward",
+    "speed_mode": "slow",
+    "duration_s": 6
+  },
+  "mode": "smooth",
+  "speed_mps": 0.15,
+  "duration_s": 6.0,
+  "acceleration_mps2": 0.15,
+  "period_s": 0.05,
+  "obstacle_stop_distance_m": null,
+  "turn_after_stop": false,
+  "bypass_after_turn": false,
+  "max_obstacles": 1,
+  "max_runtime_s": 30.0,
+  "final_forward_duration_s": 2.0,
+  "turn_duration_s": 0.0,
+  "dry_run": false,
+  "status": "completed",
+  "stop_reason": "duration_complete"
+}
